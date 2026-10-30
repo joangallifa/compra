@@ -108,7 +108,7 @@
         } catch (e) {
             throw new Error('Resposta no vàlida del servidor (HTTP ' + resp.status + ')');
         }
-        if (resp.status === 401) throw new Error('Codi d'accés incorrecte.');
+        if (resp.status === 401) throw new Error("Codi d'accés incorrecte.");
         if (!dades.success) throw new Error(dades.message || 'Error desconegut');
         return dades;
     }
@@ -151,7 +151,7 @@
     function demanaClau() {
         panell.open = true;
         campCodi.focus();
-        missatge('Primer escriu el codi d'accés i toca Desar.', 'error');
+        missatge("Primer escriu el codi d'accés i toca Desar.", 'error');
     }
 
     document.getElementById('obre-config').addEventListener('click', function () {
