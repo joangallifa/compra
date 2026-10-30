@@ -10,6 +10,6 @@ create table if not exists public.productes (
 alter table public.productes enable row level security;
 
 -- La clau anon es publica (viu al navegador): aquestes politiques decideixen que pot fer.
--- Les insercions les fa la Edge Function (service_role), per aixo no hi ha politica d'insert per a anon.
+create policy "anon insert" on public.productes for insert to anon with check (true);
 create policy "anon select" on public.productes for select to anon using (true);
 create policy "anon update" on public.productes for update to anon using (true) with check (true);
