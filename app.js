@@ -215,6 +215,17 @@
         }
     }
 
+    // Si la clau de Groq ve per parametre (?groq=gsk_...), es desa i s'esborra de l'adreça.
+    (function () {
+        var params = new URLSearchParams(window.location.search);
+        var clau = (params.get('groq') || '').trim();
+        if (!clau) return;
+        sessionStorage.setItem('cfg_groq', clau);
+        params.delete('groq');
+        var cerca = params.toString();
+        history.replaceState(null, '', window.location.pathname + (cerca ? '?' + cerca : '') + window.location.hash);
+    })();
+
     var panell = document.getElementById('config');
     var campGroq = document.getElementById('cfg-groq');
     campGroq.value = llegeixConfig().groq;
