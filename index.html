@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#2e7d32">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Llista de Compra</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="app">
+        <header class="capcalera">
+            <h1>Llista de Compra</h1>
+            <button type="button" id="obre-config" class="engranatge" aria-label="Configuració">⚙</button>
+        </header>
+
+        <details id="config" class="config">
+            <summary>Clau de Groq</summary>
+            <label>Enganxa aquí la teva clau (comença per gsk_)
+                <input id="cfg-groq" type="password" autocomplete="off" placeholder="gsk_...">
+            </label>
+            <button type="button" id="cfg-desa">Desar</button>
+        </details>
+
+        <div class="botons">
+            <button type="button" class="boto" data-tipus="compra">
+                <span class="icona" aria-hidden="true">🛒</span>
+                <span class="text">Compra</span>
+                <span class="pista">Toca i parla</span>
+            </button>
+            <button type="button" class="boto secundari" data-tipus="traster">
+                <span class="icona" aria-hidden="true">📦</span>
+                <span class="text">Pujar del traster</span>
+                <span class="pista">Toca i parla</span>
+            </button>
+        </div>
+
+        <section id="estat" class="estat" aria-live="polite">
+            Toca un botó i digues què cal. Torna a tocar-lo per acabar.
+        </section>
+        <ul id="resultat" class="resultat"></ul>
+
+        <a class="enllac-llistes" href="llista.html">📋 Veure les llistes</a>
+    </main>
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
