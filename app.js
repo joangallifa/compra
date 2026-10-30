@@ -124,7 +124,7 @@
         form.append('file', blob, 'audio.' + extensio(blob.type));
         form.append('model', 'whisper-large-v3-turbo');
         form.append('language', 'ca');
-        form.append('prompt', 'Llista de la compra en català: llet, pa, ous, pomes, formatge, llaunes de tomàquet.');
+        form.append('prompt', 'Llista de la compra en català: llet, pa, ous, pomes, formatge, iogurts per la Gemma, pa per en Joan, fruita per Anna, galetes per la Maria.');
         form.append('response_format', 'json');
         var stt = await (await crida('https://api.groq.com/openai/v1/audio/transcriptions', {
             method: 'POST',
@@ -150,6 +150,10 @@
                             'Respon NOMÉS amb JSON: {"productes":["producte 1","producte 2"]}. ' +
                             'Escriu sempre els noms dels productes en català (tradueix-los si cal). ' +
                             'Cada producte en minúscules; inclou la quantitat si es diu (ex: "2 litres de llet"). ' +
+                            'Les persones possibles són: Gemma, Joan, Anna i Maria. ' +
+                            'Si es diu per a qui és un producte (ex: "iogurts per la Gemma", "pa per en Joan"), ' +
+                            'afegeix el nom entre parèntesis amb la primera lletra en majúscula: "iogurts (Gemma)". ' +
+                            'Si no es diu per a qui és, no hi afegeixis cap nom. ' +
                             'Ignora paraules que no siguin productes. Si no n\'hi ha cap, retorna {"productes":[]}.'
                     },
                     { role: 'user', content: transcripcio }
