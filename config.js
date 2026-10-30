@@ -1,7 +1,8 @@
-// Dades públiques de Supabase (la clau "publishable" està pensada per anar al navegador;
-// la seguretat la donen les polítiques RLS de la taula).
-// La clau de Groq NO va aquí: cada persona l'escriu a l'app (⚙) i no es puja a GitHub.
+// Els valors reals els posa el workflow de GitHub Actions a partir dels secrets
+// SUPABASE_URL i SUPABASE_KEY (Settings > Secrets and variables > Actions).
+// Per provar en local, substitueix els dos textos __...__ pels teus valors (sense fer commit).
+// La clau de Groq NO va aquí: cada persona l'escriu a l'app (⚙).
 window.APP_CONFIG = {
-    supabaseUrl: 'https://kfiwcowwzuwcxxrmgqrp.supabase.co',
-    supabaseKey: 'sb_publishable_xK7TInA3Nmv0woirH0uMnw_KEsYFOiq'
+    supabaseUrl: '__SUPABASE_URL__',
+    supabaseKey: '__SUPABASE_KEY__'
 };
