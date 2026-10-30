@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    var MAX_SEGONS = 30;
+    var MAX_SEGONS = 10;
 
     var botons = document.querySelectorAll('.boto');
     var estat = document.getElementById('estat');

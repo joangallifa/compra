@@ -54,6 +54,112 @@
         btnTot.disabled = caselles.length === 0;
     }
 
+    function boto(text, etiqueta, classe) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.textContent = text;
+        b.className = 'icona-fila ' + (classe || '');
+        b.setAttribute('aria-label', etiqueta);
+        return b;
+    }
+
+    function creaFila(f) {
+        var li = document.createElement('li');
+        mostraFila(li, f, false);
+        return li;
+    }
+
+    function mostraFila(li, f, marcat) {
+        li.innerHTML = '';
+        li.className = 'fila';
+
+        var label = document.createElement('label');
+        var check = document.createElement('input');
+        check.type = 'checkbox';
+        check.value = f.id;
+        check.checked = marcat;
+        check.addEventListener('change', actualitzaBotons);
+        var nom = document.createElement('span');
+        nom.className = 'nom';
+        nom.textContent = f.nom;
+        var data = document.createElement('span');
+        data.className = 'data';
+        data.textContent = formatData(f.data);
+        label.appendChild(check);
+        label.appendChild(nom);
+        label.appendChild(data);
+
+        var edita = boto('✏️', 'Edita ' + f.nom);
+        edita.addEventListener('click', function () { editaFila(li, f, check.checked); });
+        var esborra = boto('🗑️', 'Esborra ' + f.nom, 'perill');
+        esborra.addEventListener('click', function () { esborraFila(li, f); });
+
+        li.appendChild(label);
+        li.appendChild(edita);
+        li.appendChild(esborra);
+        actualitzaBotons();
+    }
+
+    function editaFila(li, f, marcat) {
+        li.innerHTML = '';
+        li.className = 'fila editant';
+        var input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'edita-nom';
+        input.value = f.nom;
+        input.maxLength = 120;
+        var desa = boto('✔', 'Desa els canvis', 'ok');
+        var cancela = boto('✖', 'Cancel·la');
+
+        async function guarda() {
+            var nouNom = input.value.trim();
+            if (!nouNom) { input.focus(); return; }
+            if (nouNom === f.nom) { mostraFila(li, f, marcat); return; }
+            desa.disabled = true;
+            try {
+                await supabase('productes?id=eq.' + encodeURIComponent(f.id), {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+                    body: JSON.stringify({ nom: nouNom })
+                });
+                f.nom = nouNom;
+                mostraFila(li, f, marcat);
+            } catch (e) {
+                desa.disabled = false;
+                missatge('Error en desar: ' + e.message, 'error');
+            }
+        }
+
+        desa.addEventListener('click', guarda);
+        cancela.addEventListener('click', function () { mostraFila(li, f, marcat); });
+        input.addEventListener('keydown', function (ev) {
+            if (ev.key === 'Enter') guarda();
+            if (ev.key === 'Escape') mostraFila(li, f, marcat);
+        });
+
+        li.appendChild(input);
+        li.appendChild(desa);
+        li.appendChild(cancela);
+        actualitzaBotons();
+        input.focus();
+        input.select();
+    }
+
+    async function esborraFila(li, f) {
+        if (!window.confirm('Esborrar "' + f.nom + '"?')) return;
+        try {
+            await supabase('productes?id=eq.' + encodeURIComponent(f.id), {
+                method: 'DELETE',
+                headers: { Prefer: 'return=minimal' }
+            });
+            li.remove();
+            actualitzaBotons();
+            if (!llista.children.length) missatge('No hi ha res pendent.', 'ok');
+        } catch (e) {
+            missatge('Error en esborrar: ' + e.message, 'error');
+        }
+    }
+
     async function carrega() {
         llista.innerHTML = '';
         missatge('Carregant...');
@@ -67,25 +173,7 @@
                 return;
             }
             missatge('');
-            files.forEach(function (f) {
-                var li = document.createElement('li');
-                var label = document.createElement('label');
-                var check = document.createElement('input');
-                check.type = 'checkbox';
-                check.value = f.id;
-                check.addEventListener('change', actualitzaBotons);
-                var nom = document.createElement('span');
-                nom.className = 'nom';
-                nom.textContent = f.nom;
-                var data = document.createElement('span');
-                data.className = 'data';
-                data.textContent = formatData(f.data);
-                label.appendChild(check);
-                label.appendChild(nom);
-                label.appendChild(data);
-                li.appendChild(label);
-                llista.appendChild(li);
-            });
+            files.forEach(function (f) { llista.appendChild(creaFila(f)); });
             actualitzaBotons();
         } catch (e) {
             missatge('Error: ' + e.message, 'error');

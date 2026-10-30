@@ -13,3 +13,4 @@ alter table public.productes enable row level security;
 create policy "anon insert" on public.productes for insert to anon with check (true);
 create policy "anon select" on public.productes for select to anon using (true);
 create policy "anon update" on public.productes for update to anon using (true) with check (true);
+create policy "anon delete" on public.productes for delete to anon using (true);
