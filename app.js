@@ -215,21 +215,18 @@
     campGroq.value = llegeixConfig().groq;
 
     function demanaClau() {
-        panell.open = true;
-        campGroq.focus();
-        missatge('Primer enganxa la clau de Groq i toca Desar.', 'error');
+        missatge("Falta la clau de Groq. Toca la rodeta ⚙ per posar-la.", 'error');
     }
 
     document.getElementById('obre-config').addEventListener('click', function () {
         panell.open = !panell.open;
+        if (panell.open) campGroq.focus();
     });
     document.getElementById('cfg-desa').addEventListener('click', function () {
         sessionStorage.setItem('cfg_groq', campGroq.value.trim());
         panell.open = false;
         missatge('Clau desada. Ja pots gravar.', 'ok');
     });
-    if (!llegeixConfig().groq) demanaClau();
-
     botons.forEach(function (boto) {
         boto.addEventListener('click', function () {
             if (!llegeixConfig().groq) {
