@@ -85,98 +85,32 @@
 
     function llegeixConfig() {
         return {
-            groq: sessionStorage.getItem('cfg_groq') || '',
-            url: window.APP_CONFIG.supabaseUrl.replace(/\/+$/, ''),
-            anon: window.APP_CONFIG.supabaseKey
+            codi: localStorage.getItem('cfg_codi') || '',
+            url: window.APP_CONFIG.supabaseUrl.replace(/\/+$/, '')
         };
     }
 
-    async function crida(url, opcions) {
-        var resp = await fetch(url, opcions);
-        if (!resp.ok) throw new Error('HTTP ' + resp.status + ': ' + (await resp.text()));
-        return resp;
-    }
-
-    // Models de text preferits (ordre de preferencia); s'usa el primer disponible per a la clau.
-    var MODELS_LLM = [
-        'llama-3.3-70b-versatile',
-        'openai/gpt-oss-120b',
-        'openai/gpt-oss-20b',
-        'llama-3.1-8b-instant'
-    ];
-
-    async function triaModel(clauGroq) {
-        var dades = await (await crida('https://api.groq.com/openai/v1/models', {
-            headers: { Authorization: 'Bearer ' + clauGroq }
-        })).json();
-        var disponibles = (dades.data || []).map(function (m) { return m.id; });
-        for (var i = 0; i < MODELS_LLM.length; i++) {
-            if (disponibles.indexOf(MODELS_LLM[i]) !== -1) return MODELS_LLM[i];
-        }
-        throw new Error('Cap model de text disponible. Models: ' + disponibles.join(', '));
-    }
-
+    // L'àudio s'envia a la Edge Function de Supabase, que té la clau de Groq com a secret.
     async function processa(blob, tipus) {
         var cfg = llegeixConfig();
-
-        // 1) Transcripcio
         var form = new FormData();
-        form.append('file', blob, 'audio.' + extensio(blob.type));
-        form.append('model', 'whisper-large-v3-turbo');
-        form.append('language', 'ca');
-        form.append('prompt', 'Llista de la compra en català: llet, pa, ous, pomes, formatge, llaunes de tomàquet.');
-        form.append('response_format', 'json');
-        var stt = await (await crida('https://api.groq.com/openai/v1/audio/transcriptions', {
+        form.append('audio', blob, 'audio.' + extensio(blob.type));
+        form.append('tipus', tipus);
+
+        var resp = await fetch(cfg.url + '/functions/v1/processa-audio', {
             method: 'POST',
-            headers: { Authorization: 'Bearer ' + cfg.groq },
+            headers: { 'x-access-code': cfg.codi },
             body: form
-        })).json();
-        var transcripcio = (stt.text || '').trim();
-        if (!transcripcio) return { transcripcio: '', productes: [] };
-
-        // 2) Extraccio de productes
-        var model = await triaModel(cfg.groq);
-        var llm = await (await crida('https://api.groq.com/openai/v1/chat/completions', {
-            method: 'POST',
-            headers: { Authorization: 'Bearer ' + cfg.groq, 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                model: model,
-                temperature: 0,
-                response_format: { type: 'json_object' },
-                messages: [
-                    {
-                        role: 'system',
-                        content: 'Extreus productes d\'una transcripció parlada en català. ' +
-                            'Respon NOMÉS amb JSON: {"productes":["producte 1","producte 2"]}. ' +
-                            'Escriu sempre els noms dels productes en català (tradueix-los si cal). ' +
-                            'Cada producte en minúscules; inclou la quantitat si es diu (ex: "2 litres de llet"). ' +
-                            'Ignora paraules que no siguin productes. Si no n\'hi ha cap, retorna {"productes":[]}.'
-                    },
-                    { role: 'user', content: transcripcio }
-                ]
-            })
-        })).json();
-        var contingut = JSON.parse(llm.choices[0].message.content || '{}');
-        var productes = (contingut.productes || [])
-            .map(function (p) { return String(p).trim(); })
-            .filter(Boolean);
-
-        // 3) Desar a Supabase (la data la posa la BD amb default now())
-        if (productes.length) {
-            await crida(cfg.url + '/rest/v1/productes', {
-                method: 'POST',
-                headers: {
-                    apikey: cfg.anon,
-                    Authorization: 'Bearer ' + cfg.anon,
-                    'Content-Type': 'application/json',
-                    Prefer: 'return=minimal'
-                },
-                body: JSON.stringify(productes.map(function (nom) {
-                    return { nom: nom, tipus: tipus, fet: false };
-                }))
-            });
+        });
+        var dades;
+        try {
+            dades = await resp.json();
+        } catch (e) {
+            throw new Error('Resposta no vàlida del servidor (HTTP ' + resp.status + ')');
         }
-        return { transcripcio: transcripcio, productes: productes };
+        if (resp.status === 401) throw new Error('Codi d'accés incorrecte.');
+        if (!dades.success) throw new Error(dades.message || 'Error desconegut');
+        return dades;
     }
 
     async function envia(blob, tipus) {
@@ -211,28 +145,28 @@
     }
 
     var panell = document.getElementById('config');
-    var campGroq = document.getElementById('cfg-groq');
-    campGroq.value = llegeixConfig().groq;
+    var campCodi = document.getElementById('cfg-codi');
+    campCodi.value = llegeixConfig().codi;
 
     function demanaClau() {
         panell.open = true;
-        campGroq.focus();
-        missatge('Primer enganxa la clau de Groq i toca Desar.', 'error');
+        campCodi.focus();
+        missatge('Primer escriu el codi d'accés i toca Desar.', 'error');
     }
 
     document.getElementById('obre-config').addEventListener('click', function () {
         panell.open = !panell.open;
     });
     document.getElementById('cfg-desa').addEventListener('click', function () {
-        sessionStorage.setItem('cfg_groq', campGroq.value.trim());
+        localStorage.setItem('cfg_codi', campCodi.value.trim());
         panell.open = false;
-        missatge('Clau desada. Ja pots gravar.', 'ok');
+        missatge('Codi desat. Ja pots gravar.', 'ok');
     });
-    if (!llegeixConfig().groq) demanaClau();
+    if (!llegeixConfig().codi) demanaClau();
 
     botons.forEach(function (boto) {
         boto.addEventListener('click', function () {
-            if (!llegeixConfig().groq) {
+            if (!llegeixConfig().codi) {
                 demanaClau();
                 return;
             }

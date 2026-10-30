@@ -37,7 +37,7 @@ jobs:
           EOT
 
       - name: Esborra fitxers que no s'han de publicar
-        run: rm -rf .git .github supabase.sql Claus.txt config.example.js
+        run: rm -rf .git .github supabase supabase.sql Claus.txt config.example.js
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
