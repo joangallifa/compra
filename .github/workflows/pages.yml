@@ -23,16 +23,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Posa les dades de Supabase a config.js
+      - name: Genera config.js amb els secrets de Supabase
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
         run: |
           test -n "$SUPABASE_URL" && test -n "$SUPABASE_KEY"
-          sed -i "s|__SUPABASE_URL__|$SUPABASE_URL|; s|__SUPABASE_KEY__|$SUPABASE_KEY|" config.js
+          cat > config.js <<EOT
+          window.APP_CONFIG = {
+            supabaseUrl: '$SUPABASE_URL',
+            supabaseKey: '$SUPABASE_KEY'
+          };
+          EOT
 
       - name: Esborra fitxers que no s'han de publicar
-        run: rm -rf .git .github supabase.sql Claus.txt
+        run: rm -rf .git .github supabase.sql Claus.txt config.example.js
 
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
