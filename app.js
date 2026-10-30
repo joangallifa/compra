@@ -85,7 +85,7 @@
 
     function llegeixConfig() {
         return {
-            groq: sessionStorage.getItem('cfg_groq') || '',
+            groq: localStorage.getItem('cfg_groq') || '',
             url: window.APP_CONFIG.supabaseUrl.replace(/\/+$/, ''),
             anon: window.APP_CONFIG.supabaseKey
         };
@@ -220,7 +220,7 @@
         var params = new URLSearchParams(window.location.search);
         var clau = (params.get('groq') || '').trim();
         if (!clau) return;
-        sessionStorage.setItem('cfg_groq', clau);
+        localStorage.setItem('cfg_groq', clau);
         params.delete('groq');
         var cerca = params.toString();
         history.replaceState(null, '', window.location.pathname + (cerca ? '?' + cerca : '') + window.location.hash);
@@ -239,7 +239,7 @@
         if (panell.open) campGroq.focus();
     });
     document.getElementById('cfg-desa').addEventListener('click', function () {
-        sessionStorage.setItem('cfg_groq', campGroq.value.trim());
+        localStorage.setItem('cfg_groq', campGroq.value.trim());
         panell.open = false;
         missatge('Clau desada. Ja pots gravar.', 'ok');
     });
