@@ -150,7 +150,8 @@
                             'Respon NOMÉS amb JSON: {"productes":["producte 1","producte 2"]}. ' +
                             'Escriu sempre els noms dels productes en català (tradueix-los si cal). ' +
                             'Cada producte en minúscules; inclou la quantitat si es diu (ex: "2 litres de llet"). ' +
-                            'Les persones possibles són: Gemma, Joan, Anna i Maria. ' +
+                            'Les ÚNIQUES persones possibles són: Gemma, Joan, Anna i Maria; cap altre nom és possible. ' +
+                            "Si la transcripció té un nom que s'hi assembla (error de reconeixement), tria el més proper d'aquests quatre. " +
                             'Si es diu per a qui és un producte (ex: "iogurts per la Gemma", "pa per en Joan"), ' +
                             'afegeix el nom entre parèntesis amb la primera lletra en majúscula: "iogurts (Gemma)". ' +
                             'Si no es diu per a qui és, no hi afegeixis cap nom. ' +
